@@ -17,6 +17,9 @@ RUN pnpm build
 FROM golang:1.23-alpine AS backend-builder
 WORKDIR /app
 
+# Allow Go to download required toolchain version
+ENV GOTOOLCHAIN=auto
+
 # Install build dependencies
 RUN apk add --no-cache git
 
