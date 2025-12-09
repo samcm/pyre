@@ -1,6 +1,6 @@
 module github.com/samcm/pyre
 
-go 1.24.1
+go 1.23
 
 require (
 	github.com/getkin/kin-openapi v0.133.0
