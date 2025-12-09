@@ -1,0 +1,23 @@
+# Pyre - Polymarket Position Tracker
+# Copy this file to config.yaml and update with your own settings
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+database:
+  path: "./data/pyre.db"
+
+sync:
+  # How often to sync user data from Polymarket (in minutes)
+  intervalMinutes: 5
+
+# Users to track - map of username to their wallet addresses
+users:
+  # Example user - replace with the usernames and addresses you want to track
+  ExampleUser:
+    - "0x0000000000000000000000000000000000000000"
+  # You can add multiple users:
+  # AnotherUser:
+  #   - "0x1111111111111111111111111111111111111111"
+  #   - "0x2222222222222222222222222222222222222222"  # Users can have multiple wallets

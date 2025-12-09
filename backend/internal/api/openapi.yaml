@@ -1,0 +1,876 @@
+openapi: "3.0.3"
+info:
+  title: Pyre API
+  version: "1.0.0"
+  description: Polymarket position tracker - watch your money burn
+
+servers:
+  - url: /api/v1
+
+paths:
+  /users:
+    get:
+      operationId: getUsers
+      summary: Get all tracked users
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /users/{username}:
+    get:
+      operationId: getUser
+      summary: Get user details
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDetail"
+        "404":
+          description: User not found
+
+  /users/{username}/positions:
+    get:
+      operationId: getUserPositions
+      summary: Get user's current positions
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User positions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Position"
+
+  /users/{username}/trades:
+    get:
+      operationId: getUserTrades
+      summary: Get user's trade history
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: User trades
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradesResponse"
+
+  /users/{username}/pnl:
+    get:
+      operationId: getUserPnl
+      summary: Get user's PNL history
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: start
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: end
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: PNL history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PnlHistory"
+
+  /users/{username}/results:
+    get:
+      operationId: getUserResults
+      summary: Get user's resolved positions (results)
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Resolved positions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultsResponse"
+        "404":
+          description: User not found
+
+  /users/{username}/backfill:
+    post:
+      operationId: backfillUserPnl
+      summary: Backfill PNL history from trade data using FIFO cost basis
+      description: |
+        Reconstructs historical PNL by processing all trades chronologically.
+        Uses FIFO (First-In-First-Out) cost basis to calculate realized PNL.
+        Generates daily snapshots of cumulative realized PNL.
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Backfill completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BackfillResult"
+        "404":
+          description: User not found
+        "500":
+          description: Backfill failed
+
+  /trades:
+    get:
+      operationId: getTrades
+      summary: Get all recent trades with filtering
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: username
+          in: query
+          schema:
+            type: string
+        - name: side
+          in: query
+          schema:
+            type: string
+            enum: [BUY, SELL]
+        - name: minValue
+          in: query
+          schema:
+            type: number
+            format: double
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [timestamp, value, size]
+            default: timestamp
+        - name: sortDirection
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        "200":
+          description: All trades with filtering
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradesResponse"
+
+  /leaderboard:
+    get:
+      operationId: getLeaderboard
+      summary: Get leaderboard of all users
+      parameters:
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [totalPnl, realizedPnl, unrealizedPnl, winRate]
+            default: totalPnl
+        - name: sortDirection
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        "200":
+          description: Leaderboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeaderboardEntry"
+
+  /sync:
+    post:
+      operationId: triggerSync
+      summary: Trigger a sync of all user data
+      responses:
+        "202":
+          description: Sync started
+
+  /personas:
+    get:
+      operationId: getPersonas
+      summary: Get all personas (real people mapped to usernames)
+      responses:
+        "200":
+          description: List of personas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PersonaSummary"
+
+  /personas/{slug}:
+    get:
+      operationId: getPersona
+      summary: Get persona details with aggregated stats
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Persona details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonaDetail"
+        "404":
+          description: Persona not found
+
+  /personas/{slug}/accounts:
+    get:
+      operationId: getPersonaAccounts
+      summary: Get all accounts for a persona with individual stats
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Persona accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PersonaAccount"
+        "404":
+          description: Persona not found
+
+  /personas/leaderboard:
+    get:
+      operationId: getPersonaLeaderboard
+      summary: Get leaderboard by persona (aggregated stats)
+      parameters:
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [totalPnl, realizedPnl, unrealizedPnl, winRate]
+            default: totalPnl
+        - name: sortDirection
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        "200":
+          description: Persona leaderboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PersonaLeaderboardEntry"
+
+  /personas/{slug}/positions:
+    get:
+      operationId: getPersonaPositions
+      summary: Get combined positions across all accounts for a persona
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Combined positions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PersonaPosition"
+        "404":
+          description: Persona not found
+
+  /personas/{slug}/trades:
+    get:
+      operationId: getPersonaTrades
+      summary: Get combined trades across all accounts for a persona
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Combined trades
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradesResponse"
+        "404":
+          description: Persona not found
+
+  /personas/{slug}/results:
+    get:
+      operationId: getPersonaResults
+      summary: Get combined resolved positions (results) across all accounts for a persona
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Combined resolved positions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonaResultsResponse"
+        "404":
+          description: Persona not found
+
+components:
+  schemas:
+    User:
+      type: object
+      required: [username, addresses]
+      properties:
+        username:
+          type: string
+        addresses:
+          type: array
+          items:
+            type: string
+        profileImage:
+          type: string
+        lastSynced:
+          type: string
+          format: date-time
+
+    UserDetail:
+      type: object
+      required: [username, addresses, totalPnl, realizedPnl, unrealizedPnl]
+      properties:
+        username:
+          type: string
+        addresses:
+          type: array
+          items:
+            type: string
+        profileImage:
+          type: string
+        totalPnl:
+          type: number
+          format: double
+        realizedPnl:
+          type: number
+          format: double
+        unrealizedPnl:
+          type: number
+          format: double
+        openPositions:
+          type: integer
+        totalTrades:
+          type: integer
+        winRate:
+          type: number
+          format: double
+        lastSynced:
+          type: string
+          format: date-time
+
+    Position:
+      type: object
+      required: [id, marketTitle, outcome, size, avgPrice, currentPrice, unrealizedPnl]
+      properties:
+        id:
+          type: string
+        conditionId:
+          type: string
+        marketTitle:
+          type: string
+        marketSlug:
+          type: string
+        outcome:
+          type: string
+        size:
+          type: number
+          format: double
+        avgPrice:
+          type: number
+          format: double
+        currentPrice:
+          type: number
+          format: double
+        initialValue:
+          type: number
+          format: double
+        currentValue:
+          type: number
+          format: double
+        unrealizedPnl:
+          type: number
+          format: double
+        unrealizedPnlPercent:
+          type: number
+          format: double
+        endDate:
+          type: string
+          format: date-time
+
+    Trade:
+      type: object
+      required: [id, timestamp, marketTitle, outcome, side, price, size, value]
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        personaSlug:
+          type: string
+        personaDisplayName:
+          type: string
+        profileImage:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        conditionId:
+          type: string
+        marketTitle:
+          type: string
+        marketSlug:
+          type: string
+        outcome:
+          type: string
+        side:
+          type: string
+          enum: [BUY, SELL]
+        price:
+          type: number
+          format: double
+        size:
+          type: number
+          format: double
+        value:
+          type: number
+          format: double
+
+    TradesResponse:
+      type: object
+      required: [trades, total]
+      properties:
+        trades:
+          type: array
+          items:
+            $ref: "#/components/schemas/Trade"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    PnlDataPoint:
+      type: object
+      required: [timestamp, totalPnl, realizedPnl, unrealizedPnl]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        totalPnl:
+          type: number
+          format: double
+        realizedPnl:
+          type: number
+          format: double
+        unrealizedPnl:
+          type: number
+          format: double
+
+    PnlHistory:
+      type: object
+      required: [username, dataPoints]
+      properties:
+        username:
+          type: string
+        dataPoints:
+          type: array
+          items:
+            $ref: "#/components/schemas/PnlDataPoint"
+
+    LeaderboardEntry:
+      type: object
+      required: [rank, username, totalPnl, realizedPnl, unrealizedPnl]
+      properties:
+        rank:
+          type: integer
+        username:
+          type: string
+        profileImage:
+          type: string
+        personaSlug:
+          type: string
+        personaDisplayName:
+          type: string
+        totalPnl:
+          type: number
+          format: double
+        realizedPnl:
+          type: number
+          format: double
+        unrealizedPnl:
+          type: number
+          format: double
+        openPositions:
+          type: integer
+        winRate:
+          type: number
+          format: double
+
+    BackfillResult:
+      type: object
+      required: [username, tradesProcessed, snapshotsCreated, totalRealizedPnl]
+      properties:
+        username:
+          type: string
+        tradesProcessed:
+          type: integer
+        snapshotsCreated:
+          type: integer
+        totalRealizedPnl:
+          type: number
+          format: double
+        oldestTradeDate:
+          type: string
+          format: date-time
+        newestTradeDate:
+          type: string
+          format: date-time
+
+    PersonaSummary:
+      type: object
+      required: [slug, displayName, usernames]
+      properties:
+        slug:
+          type: string
+        displayName:
+          type: string
+        image:
+          type: string
+        usernames:
+          type: array
+          items:
+            type: string
+
+    PersonaDetail:
+      type: object
+      required: [slug, displayName, usernames, totalPnl, realizedPnl, unrealizedPnl]
+      properties:
+        slug:
+          type: string
+        displayName:
+          type: string
+        image:
+          type: string
+        usernames:
+          type: array
+          items:
+            type: string
+        totalPnl:
+          type: number
+          format: double
+        realizedPnl:
+          type: number
+          format: double
+        unrealizedPnl:
+          type: number
+          format: double
+        openPositions:
+          type: integer
+        totalTrades:
+          type: integer
+        winRate:
+          type: number
+          format: double
+
+    PersonaAccount:
+      type: object
+      required: [username, addresses, totalPnl, realizedPnl, unrealizedPnl]
+      properties:
+        username:
+          type: string
+        profileImage:
+          type: string
+        addresses:
+          type: array
+          items:
+            type: string
+        totalPnl:
+          type: number
+          format: double
+        realizedPnl:
+          type: number
+          format: double
+        unrealizedPnl:
+          type: number
+          format: double
+        openPositions:
+          type: integer
+        totalTrades:
+          type: integer
+        winRate:
+          type: number
+          format: double
+
+    PersonaLeaderboardEntry:
+      type: object
+      required: [rank, slug, displayName, totalPnl, realizedPnl, unrealizedPnl]
+      properties:
+        rank:
+          type: integer
+        slug:
+          type: string
+        displayName:
+          type: string
+        image:
+          type: string
+        usernames:
+          type: array
+          items:
+            type: string
+        totalPnl:
+          type: number
+          format: double
+        realizedPnl:
+          type: number
+          format: double
+        unrealizedPnl:
+          type: number
+          format: double
+        openPositions:
+          type: integer
+        winRate:
+          type: number
+          format: double
+
+    PersonaPosition:
+      type: object
+      required: [id, username, marketTitle, outcome, size, avgPrice, currentPrice, unrealizedPnl]
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        conditionId:
+          type: string
+        marketTitle:
+          type: string
+        marketSlug:
+          type: string
+        outcome:
+          type: string
+        size:
+          type: number
+          format: double
+        avgPrice:
+          type: number
+          format: double
+        currentPrice:
+          type: number
+          format: double
+        initialValue:
+          type: number
+          format: double
+        currentValue:
+          type: number
+          format: double
+        unrealizedPnl:
+          type: number
+          format: double
+        unrealizedPnlPercent:
+          type: number
+          format: double
+        endDate:
+          type: string
+          format: date-time
+
+    Result:
+      type: object
+      required: [id, conditionId, marketTitle, outcome, realizedPnl]
+      properties:
+        id:
+          type: string
+        conditionId:
+          type: string
+        marketTitle:
+          type: string
+        marketSlug:
+          type: string
+        outcome:
+          type: string
+        realizedPnl:
+          type: number
+          format: double
+        initialValue:
+          type: number
+          format: double
+        endDate:
+          type: string
+          format: date-time
+        resolutionDate:
+          type: string
+          format: date-time
+
+    ResultsResponse:
+      type: object
+      required: [results, total]
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/Result"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    PersonaResult:
+      type: object
+      required: [id, username, conditionId, marketTitle, outcome, realizedPnl]
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        conditionId:
+          type: string
+        marketTitle:
+          type: string
+        marketSlug:
+          type: string
+        outcome:
+          type: string
+        realizedPnl:
+          type: number
+          format: double
+        initialValue:
+          type: number
+          format: double
+        endDate:
+          type: string
+          format: date-time
+        resolutionDate:
+          type: string
+          format: date-time
+
+    PersonaResultsResponse:
+      type: object
+      required: [results, total]
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/PersonaResult"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer

@@ -1,0 +1,328 @@
+/* Fonts - Distinctive choices that avoid generic AI aesthetics */
+@import '@fontsource-variable/outfit';
+@import '@fontsource/dm-sans/400.css';
+@import '@fontsource/dm-sans/500.css';
+@import '@fontsource/dm-sans/600.css';
+@import '@fontsource/dm-sans/700.css';
+
+@import 'tailwindcss';
+
+/* Tailwind CSS v4 plugins */
+@plugin "@tailwindcss/forms";
+
+/* PYRE - Burning Money Theme */
+@theme {
+  /* Ember/Fire accent palette */
+  --color-ember-50: oklch(0.98 0.02 55);
+  --color-ember-100: oklch(0.94 0.05 55);
+  --color-ember-200: oklch(0.88 0.10 50);
+  --color-ember-300: oklch(0.78 0.15 45);
+  --color-ember-400: oklch(0.70 0.18 40);
+  --color-ember-500: oklch(0.62 0.20 35);
+  --color-ember-600: oklch(0.55 0.18 32);
+  --color-ember-700: oklch(0.45 0.15 30);
+  --color-ember-800: oklch(0.35 0.10 28);
+  --color-ember-900: oklch(0.25 0.06 25);
+
+  /* Ash/smoke neutrals with warm undertones */
+  --color-ash-50: oklch(0.97 0.005 60);
+  --color-ash-100: oklch(0.92 0.008 55);
+  --color-ash-200: oklch(0.84 0.01 50);
+  --color-ash-300: oklch(0.70 0.012 45);
+  --color-ash-400: oklch(0.55 0.015 40);
+  --color-ash-500: oklch(0.42 0.012 35);
+  --color-ash-600: oklch(0.32 0.01 30);
+  --color-ash-700: oklch(0.22 0.008 25);
+  --color-ash-800: oklch(0.15 0.006 20);
+  --color-ash-900: oklch(0.10 0.004 15);
+  --color-ash-950: oklch(0.06 0.003 10);
+
+  /* Semantic trading colors */
+  --color-profit: oklch(0.75 0.17 165);
+  --color-profit-glow: oklch(0.65 0.15 165 / 0.3);
+  --color-loss: oklch(0.58 0.22 20);
+  --color-loss-glow: oklch(0.50 0.20 20 / 0.3);
+
+  /* Background hierarchy - Warmer, lighter coal tones */
+  --color-bg-void: oklch(0.12 0.012 35);
+  --color-bg-deep: oklch(0.16 0.014 38);
+  --color-bg-card: oklch(0.20 0.016 42);
+  --color-bg-elevated: oklch(0.25 0.018 45);
+  --color-bg-hover: oklch(0.30 0.02 48);
+
+  /* Text colors with warm tints */
+  --color-text-bright: oklch(0.95 0.01 55);
+  --color-text-primary: oklch(0.88 0.015 50);
+  --color-text-secondary: oklch(0.65 0.02 45);
+  --color-text-muted: oklch(0.45 0.015 40);
+
+  /* Borders and dividers */
+  --color-border-subtle: oklch(0.28 0.015 42);
+  --color-border-default: oklch(0.35 0.02 45);
+  --color-border-ember: oklch(0.45 0.12 35 / 0.5);
+
+  /* Glow effects */
+  --color-glow-ember: oklch(0.60 0.18 38 / 0.15);
+  --color-glow-ember-strong: oklch(0.55 0.20 35 / 0.25);
+
+  /* Chart colors */
+  --color-chart-ember: oklch(0.65 0.18 40);
+  --color-chart-teal: oklch(0.72 0.14 180);
+  --color-chart-violet: oklch(0.65 0.18 300);
+  --color-chart-gold: oklch(0.78 0.15 85);
+
+  /* Fonts */
+  --font-display: 'Outfit Variable', 'Outfit', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+
+  /* Custom animations */
+  --animate-fade-in: fade-in 0.5s ease-out;
+  --animate-slide-up: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-glow-pulse: glow-pulse 3s ease-in-out infinite;
+  --animate-ember-flicker: ember-flicker 4s ease-in-out infinite;
+  --animate-spin-slow: spin-slow 12s linear infinite;
+
+  @keyframes fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes slide-up {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 20px var(--color-glow-ember),
+                  0 0 40px var(--color-glow-ember),
+                  inset 0 1px 0 oklch(1 0 0 / 0.05);
+    }
+    50% {
+      box-shadow: 0 0 30px var(--color-glow-ember-strong),
+                  0 0 60px var(--color-glow-ember),
+                  inset 0 1px 0 oklch(1 0 0 / 0.08);
+    }
+  }
+
+  @keyframes ember-flicker {
+    0%, 100% { opacity: 0.7; }
+    25% { opacity: 0.9; }
+    50% { opacity: 0.6; }
+    75% { opacity: 1; }
+  }
+
+  @keyframes number-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes spin-slow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+}
+
+@layer base {
+  :root {
+    background-color: var(--color-bg-void);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-void);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.6;
+  }
+
+  /* Display typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  /* Tabular numbers for data */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  /* Global focus styles */
+  *:focus-visible {
+    outline: 2px solid var(--color-ember-500);
+    outline-offset: 2px;
+  }
+
+  /* Selection color */
+  ::selection {
+    background-color: var(--color-ember-500);
+    color: var(--color-text-bright);
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg-deep);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-ash-600);
+    border-radius: 5px;
+    border: 2px solid var(--color-bg-deep);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-ash-500);
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-ash-600) var(--color-bg-deep);
+  }
+}
+
+/* Utility classes */
+@layer utilities {
+  .text-profit {
+    color: var(--color-profit);
+  }
+
+  .text-loss {
+    color: var(--color-loss);
+  }
+
+  .bg-profit {
+    background-color: var(--color-profit);
+  }
+
+  .bg-loss {
+    background-color: var(--color-loss);
+  }
+
+  .glow-profit {
+    box-shadow: 0 0 20px var(--color-profit-glow);
+  }
+
+  .glow-loss {
+    box-shadow: 0 0 20px var(--color-loss-glow);
+  }
+
+  .glow-ember {
+    box-shadow: 0 0 20px var(--color-glow-ember),
+                0 0 40px var(--color-glow-ember);
+  }
+
+  .glow-ember-strong {
+    box-shadow: 0 0 30px var(--color-glow-ember-strong),
+                0 0 60px var(--color-glow-ember);
+  }
+
+  /* Noise texture overlay */
+  .noise-overlay {
+    position: relative;
+  }
+
+  .noise-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+
+  /* Gradient masks for dramatic effects */
+  .mask-fade-b {
+    mask-image: linear-gradient(to bottom, black 60%, transparent);
+  }
+
+  /* Animated number updates */
+  .animate-number-pop {
+    animation: number-pop 0.3s ease-out;
+  }
+}
+
+/* Component-specific styles */
+@layer components {
+  /* Card with ember glow effect */
+  .card-ember {
+    background: linear-gradient(
+      145deg,
+      var(--color-bg-card) 0%,
+      var(--color-bg-deep) 100%
+    );
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-ember::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at 50% 0%,
+      var(--color-glow-ember) 0%,
+      transparent 70%
+    );
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* Table row hover with ember effect */
+  .table-row-ember {
+    transition: all 0.2s ease;
+  }
+
+  .table-row-ember:hover {
+    background: linear-gradient(
+      90deg,
+      var(--color-bg-hover) 0%,
+      var(--color-bg-elevated) 50%,
+      var(--color-bg-hover) 100%
+    );
+  }
+
+  /* Animated ember border */
+  .border-ember-animated {
+    position: relative;
+  }
+
+  .border-ember-animated::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: conic-gradient(
+      from 0deg,
+      var(--color-ember-500) 0deg,
+      transparent 60deg,
+      transparent 300deg,
+      var(--color-ember-500) 360deg
+    );
+    border-radius: inherit;
+    z-index: -1;
+    animation: ember-flicker 4s ease-in-out infinite;
+    opacity: 0.3;
+  }
+}
